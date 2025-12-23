@@ -1,0 +1,46 @@
+You are generating training data for a customer support chatbot for Atom.com, a domain marketplace platform.
+
+Given the following helpdesk article, generate 3-5 diverse questions that real customers might ask. These questions will be used to train a support chatbot.
+
+## Requirements
+
+1. **Question Diversity:** Include a mix of question types:
+   - Factual: "What is X?"
+   - Procedural: "How do I X?"
+   - Eligibility: "Am I eligible for X if Y?"
+   - Edge cases: "Does X apply to Y situation?"
+   - Consequences: "What happens if X?"
+
+2. **Natural Language:** Write questions as real customers would ask them:
+   - Use casual, conversational phrasing
+   - Include common variations (e.g., "How do I..." vs "What's the process for...")
+   - Some questions can be brief ("Commission rates?")
+   - Some can include context ("I have 40 premium listings, am I eligible for...")
+
+3. **Answerability:** Every question MUST be answerable using ONLY the information in this article. Do not generate questions requiring external knowledge.
+
+4. **Specificity:** Include at least one question about specific numbers, thresholds, or timeframes mentioned in the article.
+
+5. **Edge Cases:** If the article mentions exceptions or exclusions, generate a question about them.
+
+## Article Information
+
+**Title:** {title}
+**Collection:** {collection}
+**Description:** {description}
+
+**Content:**
+{content}
+
+## Output Format
+
+Return a JSON array of questions. Return ONLY the JSON, no other text:
+[
+  {{
+    "question": "The question text",
+    "type": "factual|procedural|eligibility|edge_case|comparative|troubleshooting|consequence",
+    "key_info_needed": "Brief note on what article info answers this"
+  }}
+]
+
+Generate 4 questions for this article.

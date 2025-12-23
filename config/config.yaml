@@ -1,0 +1,72 @@
+# Atom Helpdesk Fine-Tuning Dataset Generator Configuration
+
+# OpenAI API Configuration
+openai:
+  model: "gpt-4o"
+  model_validation: "gpt-4o-mini"
+  max_retries: 3
+  retry_delay_seconds: 5
+  batch_check_interval_seconds: 30
+
+# Scraping Configuration
+scraping:
+  base_url: "https://helpdesk.atom.com/en/"
+  request_delay_seconds: 1.0
+  max_retries: 3
+  timeout_seconds: 30
+  user_agent: "AtomHelpdeskScraper/1.0 (Training Data Generation)"
+
+# Question Generation Configuration
+generation:
+  questions_per_article:
+    min: 3
+    max: 5
+    target: 4
+  temperature_questions: 0.8
+  temperature_answers: 0.3
+  max_tokens_questions: 1000
+  max_tokens_answers: 500
+
+# Validation Configuration
+validation:
+  semantic_sample_rate: 0.10
+  similarity_threshold: 0.95
+  min_answer_chars: 20
+  max_answer_chars: 2000
+  min_question_chars: 5
+  max_question_chars: 500
+
+# Output Paths
+paths:
+  raw_articles: "data/raw/articles.json"
+  questions: "data/intermediate/questions.json"
+  qa_pairs: "data/intermediate/qa_pairs.json"
+  training_data: "data/output/training_data.jsonl"
+  final_training_data: "data/output/final_training_data.jsonl"
+  metadata: "data/output/metadata.json"
+  quality_report: "data/output/quality_report.json"
+  checkpoint: "data/checkpoint.json"
+
+# System Prompts for Fine-Tuning
+system_prompts:
+  default: "You are a helpful customer support agent for Atom.com, a domain marketplace platform. Provide accurate, friendly assistance with questions about domain listings, sales, contests, payments, and platform features. Be concise but thorough, and always base your answers on Atom's actual policies and features."
+  
+  seller: "You are a support specialist for Atom.com, helping domain sellers succeed on the marketplace. Answer questions about listings, commissions, features, and policies. Be helpful and precise."
+  
+  buyer: "You are a customer support agent for Atom.com, assisting buyers in finding and purchasing domain names. Help with questions about the buying process, payments, and transfers. Be friendly and clear."
+  
+  contest: "You are a support agent for Atom.com's naming contest platform. Help contest holders and creatives with questions about running contests, participating, and prize payments. Be encouraging and informative."
+  
+  creative: "You are a support agent for Atom.com, helping creatives participate in naming contests. Answer questions about getting started, submitting entries, winning, and payments. Be encouraging and supportive."
+
+# Collection to System Prompt Mapping
+collection_prompt_mapping:
+  "Domain Marketplace for Sellers": "seller"
+  "Domain Marketplace for Buyers": "buyer"
+  "Starting a Naming Contest": "contest"
+  "Creatives": "creative"
+  "White Label Marketplace For Sellers": "seller"
+  "AtomPay": "default"
+  "Atom.com Registrar": "default"
+  "Atom Partnerships (AtomConnect)": "default"
+  "Atom AI Tools": "default"
