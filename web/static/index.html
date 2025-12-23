@@ -486,14 +486,10 @@
     <script>
         // Configure marked for markdown rendering
         const renderer = new marked.Renderer();
-        renderer.link = function({ href, title, text }) {
-            // Only allow links from helpdesk.atom.com/en
-            if (href && href.includes('helpdesk.atom.com/en')) {
-                const titleAttr = title ? ` title="${title}"` : '';
-                return `<a href="${href}" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
-            }
-            // For non-allowed links, just show the text without making it clickable
-            return text;
+        renderer.link = function({ href, title, tokens }) {
+            // Disable all links to prevent hallucinated URLs
+            // Just return the link text without making it clickable
+            return this.parser.parseInline(tokens);
         };
         marked.setOptions({
             renderer: renderer,
