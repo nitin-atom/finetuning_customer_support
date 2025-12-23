@@ -70,3 +70,26 @@ collection_prompt_mapping:
   "Atom.com Registrar": "default"
   "Atom Partnerships (AtomConnect)": "default"
   "Atom AI Tools": "default"
+
+# Fine-tuning Configuration
+finetuning:
+  base_model: "gpt-4.1-2025-04-14"
+  suffix: "atom-support"
+  hyperparameters:
+    n_epochs: "auto"
+    batch_size: "auto"
+    learning_rate_multiplier: "auto"
+  poll_interval_seconds: 30
+
+# Output Paths (updated)
+paths:
+  raw_articles: "data/raw/articles.json"
+  questions: "data/intermediate/questions.json"
+  qa_pairs: "data/intermediate/qa_pairs.json"
+  training_data: "data/output/training_data.jsonl"
+  final_training_data: "data/output/final_training_data.jsonl"
+  metadata: "data/output/metadata.json"
+  quality_report: "data/output/quality_report.json"
+  checkpoint: "data/checkpoint.json"
+  finetune_job: "data/output/finetune_job.json"
+  finetuned_model: "data/output/finetuned_model.json"

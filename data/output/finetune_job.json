@@ -1,0 +1,44 @@
+{
+  "id": "ftjob-amrBfZnT6LtUIiJbt8ZcvCCo",
+  "created_at": 1766459805,
+  "error": {
+    "code": null,
+    "message": null,
+    "param": null
+  },
+  "fine_tuned_model": null,
+  "finished_at": null,
+  "hyperparameters": {
+    "batch_size": "auto",
+    "learning_rate_multiplier": "auto",
+    "n_epochs": "auto"
+  },
+  "model": "gpt-4.1-2025-04-14",
+  "object": "fine_tuning.job",
+  "organization_id": "org-1pqoJAZpZIhJW7BHBtZ3C0DF",
+  "result_files": [],
+  "seed": 498684508,
+  "status": "validating_files",
+  "trained_tokens": null,
+  "training_file": "file-6qNvzsm7nx8TGxopqc9Yfb",
+  "validation_file": null,
+  "estimated_finish": null,
+  "integrations": [],
+  "metadata": null,
+  "method": {
+    "type": "supervised",
+    "dpo": null,
+    "reinforcement": null,
+    "supervised": {
+      "hyperparameters": {
+        "batch_size": "auto",
+        "learning_rate_multiplier": "auto",
+        "n_epochs": "auto"
+      }
+    }
+  },
+  "user_provided_suffix": "atom-support",
+  "usage_metrics": null,
+  "shared_with_openai": false,
+  "eval_id": null
+}
