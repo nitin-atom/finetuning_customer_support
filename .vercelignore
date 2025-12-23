@@ -1,0 +1,16 @@
+# Ignore large data and virtual environments
+.venv
+__pycache__
+*.pyc
+.git
+.DS_Store
+
+# Ignore large training data, but keep the output config
+data/raw/
+data/intermediate/
+data/checkpoint.json
+# We keep data/output/finetuned_model.json as app.py needs it
+
+# Ignore offline processing scripts
+scripts/
+prompts/
