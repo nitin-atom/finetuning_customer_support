@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atom Support</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafafa;
+            --bg-tertiary: #f5f5f4;
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --border-default: rgba(0, 0, 0, 0.08);
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6b6b;
+            --text-tertiary: #9a9a9a;
+            --text-inverse: #ffffff;
+            --accent-subtle: rgba(0, 0, 0, 0.04);
+            --accent-hover: rgba(0, 0, 0, 0.06);
+            --user-bubble: #292929;
+            --assistant-bubble: #f7f7f6;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-secondary);
+            height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        #app {
+            max-width: 720px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-md), 0 0 0 1px var(--border-subtle);
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: var(--bg-primary);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .header-badge {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            background: var(--bg-tertiary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Messages Area */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--bg-primary);
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+            border-radius: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        /* Message Bubbles */
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            max-width: 75%;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.933rem;
+            animation: messageIn 0.25s ease-out;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: var(--user-bubble);
+            color: var(--text-inverse);
+            margin-left: auto;
+            border-bottom-right-radius: var(--radius-sm);
+        }
+
+        .message.assistant {
+            background: var(--assistant-bubble);
+            color: var(--text-primary);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+
+        .message.system-info {
+            text-align: center;
+            color: var(--text-tertiary);
+            background: transparent;
+            max-width: 100%;
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            margin: 8px 0;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 16px 24px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 12px;
+            background: var(--bg-primary);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            resize: none;
+            font-size: 0.933rem;
+            font-family: inherit;
+            min-height: 46px;
+            max-height: 150px;
+            line-height: 1.5;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        #messageInput::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+        }
+
+        #messageInput:disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        button {
+            padding: 10px 18px;
+            background: var(--text-primary);
+            color: var(--text-inverse);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.867rem;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button:hover {
+            background: #000000;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: var(--text-tertiary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-default);
+        }
+
+        button.secondary:hover {
+            background: var(--accent-hover);
+            border-color: var(--border-default);
+            color: var(--text-primary);
+        }
+
+        button.secondary:disabled {
+            background: transparent;
+            color: var(--text-tertiary);
+            border-color: var(--border-subtle);
+        }
+
+        /* Send Button Icon */
+        #sendButton::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13'/%3E%3Cpath d='M22 2L15 22L11 13L2 9L22 2Z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        /* Select Dropdown */
+        select {
+            padding: 8px 32px 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default);
+            font-size: 0.867rem;
+            font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        select:hover {
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+        }
+
+        select:disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            cursor: not-allowed;
+        }
+
+        /* Streaming Cursor */
+        .streaming-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--text-secondary);
+            margin-left: 2px;
+            animation: cursorBlink 1s ease-in-out infinite;
+            vertical-align: text-bottom;
+            border-radius: 1px;
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Model Info Footer */
+        .model-info {
+            font-size: 0.733rem;
+            color: var(--text-tertiary);
+            text-align: center;
+            padding: 10px 24px;
+            border-top: 1px solid var(--border-subtle);
+            background: var(--bg-secondary);
+            letter-spacing: 0.01em;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header-title {
+                flex-wrap: wrap;
+            }
+
+            .messages {
+                padding: 20px;
+            }
+
+            .input-area {
+                padding: 12px 20px 16px;
+            }
+
+            .message {
+                max-width: 88%;
+            }
+
+            #sendButton span {
+                display: none;
+            }
+
+            #sendButton {
+                padding: 10px 14px;
+            }
+        }
+
+        /* Markdown Styles */
+        .message a {
+            color: #2563eb;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .message a:hover {
+            color: #1d4ed8;
+        }
+
+        .message.user a {
+            color: #93c5fd;
+        }
+
+        .message.user a:hover {
+            color: #bfdbfe;
+        }
+
+        .message p {
+            margin: 0 0 0.75em 0;
+        }
+
+        .message p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message ul, .message ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+
+        .message li {
+            margin: 0.25em 0;
+        }
+
+        .message code {
+            background: rgba(0, 0, 0, 0.06);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+        }
+
+        .message.user code {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .message pre {
+            background: rgba(0, 0, 0, 0.06);
+            padding: 0.75em 1em;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5em 0;
+        }
+
+        .message.user pre {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .message pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .message blockquote {
+            border-left: 3px solid rgba(0, 0, 0, 0.2);
+            margin: 0.5em 0;
+            padding-left: 1em;
+            color: var(--text-secondary);
+        }
+
+        .message.user blockquote {
+            border-left-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .message strong {
+            font-weight: 600;
+        }
+
+        .message em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <div class="header-title">
+                <h1>Atom Support</h1>
+                <span class="header-badge">AI</span>
+            </div>
+            <div class="header-controls">
+                <select id="promptSelect">
+                    <option value="">Loading...</option>
+                </select>
+                <button id="clearButton" class="secondary">Clear</button>
+            </div>
+        </div>
+
+        <div class="messages" id="messages"></div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea id="messageInput" placeholder="Send a message..." rows="1"></textarea>
+            </div>
+            <button id="sendButton"><span>Send</span></button>
+        </div>
+
+        <div class="model-info" id="modelInfo">Loading model...</div>
+    </div>
+
+    <script>
+        // Configure marked for markdown rendering
+        const renderer = new marked.Renderer();
+        renderer.link = function({ href, title, text }) {
+            // Only allow links from helpdesk.atom.com/en
+            if (href && href.includes('helpdesk.atom.com/en')) {
+                const titleAttr = title ? ` title="${title}"` : '';
+                return `<a href="${href}" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
+            }
+            // For non-allowed links, just show the text without making it clickable
+            return text;
+        };
+        marked.setOptions({
+            renderer: renderer,
+            breaks: true,
+            gfm: true
+        });
+
+        // State
+        const state = {
+            sessionId: crypto.randomUUID(),
+            isStreaming: false,
+            currentSystemPrompt: 'default',
+            streamingContent: ''
+        };
+
+        // DOM elements
+        const elements = {
+            messages: document.getElementById('messages'),
+            messageInput: document.getElementById('messageInput'),
+            sendButton: document.getElementById('sendButton'),
+            clearButton: document.getElementById('clearButton'),
+            promptSelect: document.getElementById('promptSelect'),
+            modelInfo: document.getElementById('modelInfo')
+        };
+
+        // Helper: Append message to chat
+        function appendMessage(role, content, useMarkdown = true) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            if (useMarkdown && content) {
+                div.innerHTML = marked.parse(content);
+            } else {
+                div.textContent = content;
+            }
+            elements.messages.appendChild(div);
+            scrollToBottom();
+            return div;
+        }
+
+        // Helper: Append system info message
+        function appendSystemInfo(content) {
+            const div = document.createElement('div');
+            div.className = 'message system-info';
+            div.textContent = content;
+            elements.messages.appendChild(div);
+            scrollToBottom();
+        }
+
+        // Helper: Scroll to bottom
+        function scrollToBottom() {
+            elements.messages.scrollTop = elements.messages.scrollHeight;
+        }
+
+        // Helper: Update UI state
+        function updateUI() {
+            elements.sendButton.disabled = state.isStreaming;
+            elements.messageInput.disabled = state.isStreaming;
+            elements.clearButton.disabled = state.isStreaming;
+            elements.promptSelect.disabled = state.isStreaming;
+        }
+
+        // Auto-resize textarea
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        }
+
+        // Send message with SSE streaming
+        async function sendMessage() {
+            const message = elements.messageInput.value.trim();
+            if (!message || state.isStreaming) return;
+
+            // Add user message to UI
+            appendMessage('user', message);
+            elements.messageInput.value = '';
+            autoResize(elements.messageInput);
+
+            // Create assistant message container for streaming
+            const assistantDiv = appendMessage('assistant', '', false);
+            const cursor = document.createElement('span');
+            cursor.className = 'streaming-cursor';
+            assistantDiv.appendChild(cursor);
+
+            state.isStreaming = true;
+            state.streamingContent = '';
+            updateUI();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: state.sessionId,
+                        message: message
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Keep incomplete line in buffer
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.content) {
+                                    // Accumulate content and re-render with markdown
+                                    state.streamingContent += data.content;
+                                    cursor.remove();
+                                    assistantDiv.innerHTML = marked.parse(state.streamingContent);
+                                    assistantDiv.appendChild(cursor);
+                                    scrollToBottom();
+                                }
+                                if (data.error) {
+                                    cursor.remove();
+                                    state.streamingContent += '\n\nError: ' + data.error;
+                                    assistantDiv.innerHTML = marked.parse(state.streamingContent);
+                                }
+                            } catch (e) {
+                                // Ignore parse errors for non-JSON lines
+                            }
+                        }
+                    }
+                }
+
+                cursor.remove();
+
+            } catch (error) {
+                console.error('Error:', error);
+                cursor.remove();
+                assistantDiv.innerHTML = marked.parse('Error: ' + error.message);
+            }
+
+            state.isStreaming = false;
+            updateUI();
+            elements.messageInput.focus();
+        }
+
+        // Clear conversation history
+        async function clearHistory() {
+            try {
+                await fetch('/api/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: state.sessionId })
+                });
+                elements.messages.innerHTML = '';
+                appendSystemInfo('Conversation cleared');
+            } catch (error) {
+                console.error('Error clearing:', error);
+            }
+        }
+
+        // Switch system prompt
+        async function switchSystemPrompt(promptKey) {
+            try {
+                await fetch('/api/system', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: state.sessionId,
+                        prompt_key: promptKey
+                    })
+                });
+                state.currentSystemPrompt = promptKey;
+                elements.messages.innerHTML = '';
+                appendSystemInfo(`Switched to "${promptKey}" mode`);
+            } catch (error) {
+                console.error('Error switching prompt:', error);
+            }
+        }
+
+        // Initialize
+        async function init() {
+            // Load available prompts
+            try {
+                const response = await fetch('/api/prompts');
+                const data = await response.json();
+                elements.promptSelect.innerHTML = '';
+                data.prompts.forEach(prompt => {
+                    const option = document.createElement('option');
+                    option.value = prompt;
+                    option.textContent = prompt.charAt(0).toUpperCase() + prompt.slice(1);
+                    if (prompt === 'default') option.selected = true;
+                    elements.promptSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading prompts:', error);
+            }
+
+            // Load model info
+            try {
+                const response = await fetch('/api/model');
+                const data = await response.json();
+                elements.modelInfo.textContent = `Model: ${data.model_id}`;
+            } catch (error) {
+                elements.modelInfo.textContent = 'Model info unavailable';
+            }
+
+            // Welcome message
+            appendSystemInfo('Welcome to Atom Support! Ask any questions about domains, marketplace, or contests.');
+
+            // Event listeners
+            elements.sendButton.addEventListener('click', sendMessage);
+            elements.clearButton.addEventListener('click', clearHistory);
+            elements.promptSelect.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    switchSystemPrompt(e.target.value);
+                }
+            });
+
+            // Enter to send, Shift+Enter for newline
+            elements.messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            elements.messageInput.addEventListener('input', () => {
+                autoResize(elements.messageInput);
+            });
+
+            // Focus input
+            elements.messageInput.focus();
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
