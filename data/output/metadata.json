@@ -1,0 +1,58 @@
+{
+  "generated_at": "2025-12-22T18:12:45.458057",
+  "total_examples": 536,
+  "source_articles": 134,
+  "avg_questions_per_article": 4.0,
+  "collections_covered": [
+    {
+      "name": "Domain Marketplace for Sellers",
+      "examples": 168
+    },
+    {
+      "name": "Creatives",
+      "examples": 164
+    },
+    {
+      "name": "Domain Marketplace for Buyers",
+      "examples": 72
+    },
+    {
+      "name": "Atom.com Registrar",
+      "examples": 60
+    },
+    {
+      "name": "White Label Marketplace For Sellers",
+      "examples": 40
+    },
+    {
+      "name": "AtomPay",
+      "examples": 16
+    },
+    {
+      "name": "Starting a Naming Contest",
+      "examples": 8
+    },
+    {
+      "name": "Atom Partnerships (AtomConnect)",
+      "examples": 4
+    },
+    {
+      "name": "Atom AI Tools",
+      "examples": 4
+    }
+  ],
+  "question_type_distribution": {
+    "procedural": 133,
+    "eligibility": 91,
+    "consequence": 116,
+    "edge_case": 101,
+    "factual": 80,
+    "troubleshooting": 12,
+    "comparative": 1,
+    "specificity": 2
+  },
+  "avg_answer_length_chars": 382.7,
+  "output_file": "/Users/nathanscheibe/finetuning_model/data/output/training_data.jsonl",
+  "validation_passed": true,
+  "final_examples": 535
+}
